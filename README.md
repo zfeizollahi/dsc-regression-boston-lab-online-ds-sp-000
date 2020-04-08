@@ -19,15 +19,17 @@ You will be able to:
 
 ```python
 # Your code here
-```
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.formula.api import ols
+import statsmodels.api as sm
+import scipy.stats as stats
+import numpy as np
+%matplotlib inline
 
-The columns in the Boston housing data represent the dependent and independent variables. The dependent variable here is the median house value `MEDV`. The description of the other variables is available on [KAGGLE](https://www.kaggle.com/c/boston-housing). 
-
-### Inspect the columns of the dataset and comment on type of variables present
-
-
-```python
-# Your code here
+bostonhousing_df = pd.read_csv('BostonHousing.csv')
+bostonhousing_df.head()
 ```
 
 
@@ -159,28 +161,64 @@ The columns in the Boston housing data represent the dependent and independent v
 
 
 
+The columns in the Boston housing data represent the dependent and independent variables. The dependent variable here is the median house value `MEDV`. The description of the other variables is available on [KAGGLE](https://www.kaggle.com/c/boston-housing). 
+
+### Inspect the columns of the dataset and comment on type of variables present
+
 
 ```python
-# Record your observations here 
-
+# Your code here
+bostonhousing_df.info()
 ```
+
+    <class 'pandas.core.frame.DataFrame'>
+    RangeIndex: 506 entries, 0 to 505
+    Data columns (total 14 columns):
+    crim       506 non-null float64
+    zn         506 non-null float64
+    indus      506 non-null float64
+    chas       506 non-null int64
+    nox        506 non-null float64
+    rm         506 non-null float64
+    age        506 non-null float64
+    dis        506 non-null float64
+    rad        506 non-null int64
+    tax        506 non-null int64
+    ptratio    506 non-null float64
+    b          506 non-null float64
+    lstat      506 non-null float64
+    medv       506 non-null float64
+    dtypes: float64(11), int64(3)
+    memory usage: 55.4 KB
+
+
+#### Record your observations here 
+1. no missing values
+2. All integers or float types
+3. some integers may be categorical codes.
 
 ### Create histograms for all variables in the dataset and comment on their shape (uniform or not?)
 
 
 ```python
 # Your code here 
+bostonhousing_df.hist(figsize=(10,8))
+plt.show
 ```
 
 
-![png](index_files/index_6_0.png)
+
+
+    <function matplotlib.pyplot.show(*args, **kw)>
 
 
 
-```python
-# You observations here 
 
-```
+![png](index_files/index_6_1.png)
+
+
+#### You observations here 
+Hardly any variable has a normal distribution except for perhaps Rooms and the dependent variable medv. Though both seem to have a tail on the upper ends. (?? negatively skewed?)
 
 Based on this, we preselected some features  for you which appear to be more 'normal' than others.
 ### Create a new dataset with `['crim', 'dis', 'rm', 'zn', 'age', 'medv']`
@@ -188,6 +226,8 @@ Based on this, we preselected some features  for you which appear to be more 'no
 
 ```python
 # Your code here
+bostonhousing_df_subset = bostonhousing_df[['crim', 'dis', 'rm', 'age', 'medv']]
+bostonhousing_df_subset.head()
 ```
 
 
@@ -214,7 +254,6 @@ Based on this, we preselected some features  for you which appear to be more 'no
       <th>crim</th>
       <th>dis</th>
       <th>rm</th>
-      <th>zn</th>
       <th>age</th>
       <th>medv</th>
     </tr>
@@ -225,7 +264,6 @@ Based on this, we preselected some features  for you which appear to be more 'no
       <td>0.00632</td>
       <td>4.0900</td>
       <td>6.575</td>
-      <td>18.0</td>
       <td>65.2</td>
       <td>24.0</td>
     </tr>
@@ -234,7 +272,6 @@ Based on this, we preselected some features  for you which appear to be more 'no
       <td>0.02731</td>
       <td>4.9671</td>
       <td>6.421</td>
-      <td>0.0</td>
       <td>78.9</td>
       <td>21.6</td>
     </tr>
@@ -243,7 +280,6 @@ Based on this, we preselected some features  for you which appear to be more 'no
       <td>0.02729</td>
       <td>4.9671</td>
       <td>7.185</td>
-      <td>0.0</td>
       <td>61.1</td>
       <td>34.7</td>
     </tr>
@@ -252,7 +288,6 @@ Based on this, we preselected some features  for you which appear to be more 'no
       <td>0.03237</td>
       <td>6.0622</td>
       <td>6.998</td>
-      <td>0.0</td>
       <td>45.8</td>
       <td>33.4</td>
     </tr>
@@ -261,7 +296,6 @@ Based on this, we preselected some features  for you which appear to be more 'no
       <td>0.06905</td>
       <td>6.0622</td>
       <td>7.147</td>
-      <td>0.0</td>
       <td>54.2</td>
       <td>36.2</td>
     </tr>
@@ -276,6 +310,11 @@ Based on this, we preselected some features  for you which appear to be more 'no
 
 ```python
 # Your code here 
+for column in ['crim', 'dis', 'rm', 'age']:
+    fig = plt.figure()
+    plt.scatter(bostonhousing_df_subset[column], bostonhousing_df_subset['medv'])
+    plt.title(column)
+    plt.show
 ```
 
 
@@ -294,14 +333,8 @@ Based on this, we preselected some features  for you which appear to be more 'no
 ![png](index_files/index_11_3.png)
 
 
-
-![png](index_files/index_11_4.png)
-
-
-
-```python
-# Your observations here 
-```
+#### Your observations here 
+Data is fairly spread out though you can see some associations, but particularly with rooms. I wouldn't make any decisions here about the data since it's very difficult to tell if there's no relationship, or skew.
 
 Clearly, your data needs a lot of preprocessing to improve the results. This key behind a Kaggle competition is to process the data in such a way that you can identify the relationships and make predictions in the best possible way. For now, we'll the dataset untouched and just move on with the regression. The assumptions are _exactly_ all fulfilled, but they still hold to a level that we can move on. 
 
@@ -324,99 +357,144 @@ Now, let's perform a number of simple regression experiments between the chosen 
 
 
 ```python
-# Your code here
+def variable_model_stats(variable):
+    f = 'medv~' + variable
+    print("Results for {} dependent variable".format(variable))
+    model = ols(formula=f, data=bostonhousing_df_subset[[variable,'medv']]).fit()
+    min_max_df = pd.DataFrame(data={variable: [bostonhousing_df_subset[variable].min(), 
+                                               bostonhousing_df_subset[variable].max()]})
+    min_max_df['Prediction'] = model.predict(min_max_df)
+    print(min_max_df)
+    fig = plt.figure()
+    plt.scatter(bostonhousing_df_subset[variable], bostonhousing_df_subset['medv'])
+    plt.plot(min_max_df[variable], min_max_df['Prediction'], c='red')
+    plt.show()  
+    fig = plt.figure(figsize=(15,8))
+    fig = sm.graphics.plot_regress_exog(model, variable, fig=fig)
+    plt.show()
+    residuals = model.resid
+    fig = plt.figure(figsize=(15,8))
+    fig = sm.graphics.qqplot(residuals, dist=stats.norm, line='45', fit=True)
+    plt.show()
+    return np.array([variable, model.rsquared, model.params[0],
+                     model.params[1], model.pvalues[1], sm.stats.jarque_bera(model.resid)[0]])
 ```
 
-    Boston Housing DataSet - Regression Analysis and Diagnostics for formula: medv~crim
-    -------------------------------------------------------------------------------------
+
+```python
+models = []
+for dependent_variable in ['crim', 'dis', 'rm', 'age']:
+    model_values = variable_model_stats(dependent_variable)
+    models.append(model_values)
+    print(model_values)
+    input("Press Enter to continue...")
+```
+
+    Results for crim dependent variable
+           crim  Prediction
+    0   0.00632   24.030482
+    1  88.97620  -12.908947
 
 
 
-![png](index_files/index_14_1.png)
+![png](index_files/index_15_1.png)
 
 
 
-![png](index_files/index_14_2.png)
+![png](index_files/index_15_2.png)
 
 
 
-![png](index_files/index_14_3.png)
+    <Figure size 1080x576 with 0 Axes>
 
 
+
+![png](index_files/index_15_4.png)
+
+
+    ['crim' '0.15078046904975717' '24.033106174123876' '-0.4151902779150912'
+     '1.1739870821942348e-19' '295.40371976845904']
     Press Enter to continue...
-    Boston Housing DataSet - Regression Analysis and Diagnostics for formula: medv~dis
-    -------------------------------------------------------------------------------------
+    Results for dis dependent variable
+           dis  Prediction
+    0   1.1296   19.623174
+    1  12.1265   31.627534
 
 
 
-![png](index_files/index_14_5.png)
+![png](index_files/index_15_6.png)
 
 
 
-![png](index_files/index_14_6.png)
+![png](index_files/index_15_7.png)
 
 
 
-![png](index_files/index_14_7.png)
+    <Figure size 1080x576 with 0 Axes>
 
 
+
+![png](index_files/index_15_9.png)
+
+
+    ['dis' '0.062464372121782796' '18.39008833049339' '1.091613015841109'
+     '1.2066117273371135e-08' '305.10416474827383']
     Press Enter to continue...
-    Boston Housing DataSet - Regression Analysis and Diagnostics for formula: medv~rm
-    -------------------------------------------------------------------------------------
+    Results for rm dependent variable
+          rm  Prediction
+    0  3.561   -2.258011
+    1  8.780   45.245896
 
 
 
-![png](index_files/index_14_9.png)
+![png](index_files/index_15_11.png)
 
 
 
-![png](index_files/index_14_10.png)
+![png](index_files/index_15_12.png)
 
 
 
-![png](index_files/index_14_11.png)
+    <Figure size 1080x576 with 0 Axes>
 
 
+
+![png](index_files/index_15_14.png)
+
+
+    ['rm' '0.4835254559913341' '-34.67062077643858' '9.102108981180312'
+     '2.4872288710076683e-74' '612.4489850641658']
     Press Enter to continue...
-    Boston Housing DataSet - Regression Analysis and Diagnostics for formula: medv~zn
-    -------------------------------------------------------------------------------------
+    Results for age dependent variable
+         age  Prediction
+    0    2.9   30.621506
+    1  100.0   18.662406
 
 
 
-![png](index_files/index_14_13.png)
+![png](index_files/index_15_16.png)
 
 
 
-![png](index_files/index_14_14.png)
+![png](index_files/index_15_17.png)
 
 
 
-![png](index_files/index_14_15.png)
-
-
-    Press Enter to continue...
-    Boston Housing DataSet - Regression Analysis and Diagnostics for formula: medv~age
-    -------------------------------------------------------------------------------------
+    <Figure size 1080x576 with 0 Axes>
 
 
 
-![png](index_files/index_14_17.png)
+![png](index_files/index_15_19.png)
 
 
-
-![png](index_files/index_14_18.png)
-
-
-
-![png](index_files/index_14_19.png)
-
-
+    ['age' '0.14209474407780465' '30.978677762618037' '-0.12316272123567971'
+     '1.5699822091881113e-18' '456.9834336489886']
     Press Enter to continue...
 
 
 
 ```python
-pd.DataFrame(results)
+pd.DataFrame(models, columns=['variable', 'rsquared', 'intercept', 'slope', 'p-value', 'JB normality' ])
 ```
 
 
@@ -440,68 +518,50 @@ pd.DataFrame(results)
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>0</th>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
+      <th>variable</th>
+      <th>rsquared</th>
+      <th>intercept</th>
+      <th>slope</th>
+      <th>p-value</th>
+      <th>JB normality</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>ind_var</td>
-      <td>r_squared</td>
-      <td>intercept</td>
-      <td>slope</td>
-      <td>p-value</td>
-      <td>normality (JB)</td>
+      <td>crim</td>
+      <td>0.15078046904975717</td>
+      <td>24.033106174123876</td>
+      <td>-0.4151902779150912</td>
+      <td>1.1739870821942348e-19</td>
+      <td>295.40371976845904</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>crim</td>
-      <td>0.15078</td>
-      <td>24.0331</td>
-      <td>-0.41519</td>
-      <td>1.17399e-19</td>
-      <td>295.404</td>
+      <td>dis</td>
+      <td>0.062464372121782796</td>
+      <td>18.39008833049339</td>
+      <td>1.091613015841109</td>
+      <td>1.2066117273371135e-08</td>
+      <td>305.10416474827383</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>dis</td>
-      <td>0.0624644</td>
-      <td>18.3901</td>
-      <td>1.09161</td>
-      <td>1.20661e-08</td>
-      <td>305.104</td>
+      <td>rm</td>
+      <td>0.4835254559913341</td>
+      <td>-34.67062077643858</td>
+      <td>9.102108981180312</td>
+      <td>2.4872288710076683e-74</td>
+      <td>612.4489850641658</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>rm</td>
-      <td>0.483525</td>
-      <td>-34.6706</td>
-      <td>9.10211</td>
-      <td>2.48723e-74</td>
-      <td>612.449</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>zn</td>
-      <td>0.129921</td>
-      <td>20.9176</td>
-      <td>0.14214</td>
-      <td>5.71358e-17</td>
-      <td>262.387</td>
-    </tr>
-    <tr>
-      <th>5</th>
       <td>age</td>
-      <td>0.142095</td>
-      <td>30.9787</td>
-      <td>-0.123163</td>
-      <td>1.56998e-18</td>
-      <td>456.983</td>
+      <td>0.14209474407780465</td>
+      <td>30.978677762618037</td>
+      <td>-0.12316272123567971</td>
+      <td>1.5699822091881113e-18</td>
+      <td>456.9834336489886</td>
     </tr>
   </tbody>
 </table>
@@ -509,11 +569,9 @@ pd.DataFrame(results)
 
 
 
-
-```python
-#Your observations here 
-
-```
+#### Your observations here 
+1. None of these have a JB normality close to 1, and p values well below .05 so we can reject null hypothesis of assuming a normal idstribution.
+2. rsquared - none are close to 1, the highest one is rooms, but even then below 0.5
 
 Clearly, the results are not very reliable. The best R-Squared is witnessed with `rm`, so in this analysis, this is uour best predictor. 
 
